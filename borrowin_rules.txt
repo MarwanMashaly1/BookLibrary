@@ -1,0 +1,15 @@
+Rules to borrow a book:
+
+1. Borrowing period is 2 weeks and then the book must be returned
+2. If the book is not returned within 2 weeks, a fine of $1 per day will be charged
+ unless the borrowing period was extended and approved
+3. If the book is lost, the borrower must pay the price of the book
+4. If the book is damaged, the borrower must pay the repair cost
+5. if the book was not returned after 2 weeks from the due date, the borrower will be banned from borrowing books for 1 month and will be charged $10
+6. If the book was not returned after 1 month from the due date, the borrower will be banned from borrowing books for 4 months and will be charged the book price
+7. Books will be picked up from the library from the responsible admin and returned to the library by the borrower
+8. Books will be categorized by genre and author using standard library classification
+9. only approved books by the institution board can be borrowed
+10. borrowing will be based on a queue system
+11. Books can only be extended if there is no one in the queue waiting for the book
+12. The borrower must be a registered member of the library
