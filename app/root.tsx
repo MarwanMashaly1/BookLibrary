@@ -1,30 +1,23 @@
-import { Links, Meta, Outlet, Scripts } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, useLoaderData } from "@remix-run/react";
 import "./tailwind.css";
 import { AuthProvider } from "~/context/AuthContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
-// import { supabase } from "~/utils/auth.server";
-// export const loader = async () => {
-//   const env = {
-//     SUPABASE_URL: process.env.SUPABASE_URL!,
-//     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY!,
-//   };
+import { json, LoaderFunction } from "@remix-run/node";
+import { getAuthSession } from "./utils/auth.server";
 
-//   // const response = new Response();
-//   // const { supabase, headers } = getSupabase(request);
+export const loader: LoaderFunction = async ({ request }) => {
+  const session = await getAuthSession();
+  return json({ session });
+};
 
-//   const {
-//     data: { session },
-//   } = await supabase.auth.getSession();
-
-//   return json({ env, session });
-// };
 
 export default function App() {
   // const { env, session } = useLoaderData<typeof loader>();
   // const [supabase] = useState(() =>
-  //   createBrowserClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+  //   createBrowserClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
   // );
+  const { session } = useLoaderData<{ session: any }>();
 
   return (
     <html lang="en">
@@ -33,7 +26,7 @@ export default function App() {
         <Links />
       </head>
       <body className="min-h-screen flex flex-col">
-        <AuthProvider>
+        <AuthProvider initialSession={session}>
           <Navbar />
           <main className="flex-grow">
             {/* <Outlet context={{ supabase }} /> */}

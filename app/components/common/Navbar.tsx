@@ -4,7 +4,6 @@ import { Link } from "@remix-run/react";
 
 const Navbar = () => {
   const session = useAuth(); // Access the session from the AuthContext
-  console.log("Sessiobn: ", session);
 
   return (
     <nav className="bg-white shadow-md p-4 flex items-center justify-between">

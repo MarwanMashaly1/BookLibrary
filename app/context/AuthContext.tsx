@@ -1,119 +1,102 @@
-// import {
+// import React, {
 //   createContext,
 //   useContext,
 //   useEffect,
 //   useState,
 //   ReactNode,
 // } from "react";
-// import { supabase } from "~/utils/auth.client";
-// import { Session } from "@supabase/supabase-js";
+// import { Session, User } from "@supabase/supabase-js";
+// import { getAuthSession } from "~/utils/auth.server";
 
-// // Initialize the context with null
-// const AuthContext = createContext<Session | null>(null);
+
+// interface AuthContextProps {
+//   session: Session | null;
+//   user: User | null;
+//   isAuthenticated: () => Promise<boolean>;
+// }
+
+// const AuthContext = createContext<AuthContextProps | null>(null);
 
 // interface AuthProviderProps {
 //   children: ReactNode;
+//   initialSession: Session | null;
 // }
 
-// export const AuthProvider = ({ children }: AuthProviderProps) => {
-//   const [session, setSession] = useState<Session | null>(null); // State to hold the session
+// export const AuthProvider = ({ children, initialSession }: AuthProviderProps) => {
+//   const [session, setSession] = useState<Session | null>(initialSession);
+//   const [user, setUser] = useState<User | null>(initialSession?.user ?? null); // Store user data
+//   const [loading, setLoading] = useState(!initialSession); // Add loading state
 
+//   // Initialize session and auth state
 //   useEffect(() => {
-//     // Fetch the initial session when the component mounts
-//     const getSession = async () => {
-//       const {
-//         data: { session },
-//       } = await supabase.auth.getSession();
-//       setSession(session); // Set the session state
-//     };
+//     if (!initialSession) {
+//       const initializeAuth = async () => {
+//         const session = await getAuthSession();
+//         setSession(session);
+//         setUser(session?.user ?? null); // Set user if session exists
+//         setLoading(false); // Set loading to false after fetching session
+//       };
 
-//     getSession(); // Call to get the initial session state
+//       initializeAuth();
+//     }
+//   }, [initialSession]);
 
-//     // Set up the onAuthStateChange listener to respond to login/signup/logout
-//     const {
-//       data: { subscription },
-//     } = supabase.auth.onAuthStateChange((_event, session) => {
-//       setSession(session); // Automatically update session on any auth change
-//     });
+//   // Function to check if user is authenticated
+//   const isAuthenticated = async (): Promise<boolean> => {
+//     const session = await getAuthSession();
+//     return session?.user != null;
+//   };
 
-//     // Clean up the listener on unmount to prevent memory leaks
-//     return () => subscription?.unsubscribe();
-//   }, []);
+//   if (loading) {
+//     return <div>Loading...</div>; // Render loader while loading
+//   }
 
 //   return (
-//     <AuthContext.Provider value={session}>{children}</AuthContext.Provider>
+//     <AuthContext.Provider value={{ session, user, isAuthenticated }}>
+//       {children}
+//     </AuthContext.Provider>
 //   );
 // };
 
-// // Hook to use the Auth context
-// export const useAuth = () => useContext(AuthContext);
-
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from "react";
-import { supabase } from "~/utils/auth.client";
+// // Hook to use the AuthContext
+// export const useAuth = () => {
+//   const context = useContext(AuthContext);
+//   if (!context) {
+//     throw new Error("useAuth must be used within an AuthProvider");
+//   }
+//   return context;
+// };
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { redirect } from "@remix-run/node";
-import { destroySession, getSession } from "~/utils/session.server";
 
 interface AuthContextProps {
   session: Session | null;
   user: User | null;
-  isAuthenticated: () => Promise<boolean>;
-  logout: () => Promise<void>;
+  isAuthenticated: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextProps | null>(null);
 
 interface AuthProviderProps {
   children: ReactNode;
+  initialSession: Session | null;
 }
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null); // Store user data
+export const AuthProvider = ({ children, initialSession }: AuthProviderProps) => {
+  const [session, setSession] = useState<Session | null>(initialSession);
+  const [user, setUser] = useState<User | null>(initialSession?.user ?? null);
 
-  // Initialize session and auth state
   useEffect(() => {
-    const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null); // Set user if session exists
-    };
+    setSession(initialSession);
+    setUser(initialSession?.user ?? null);
+  }, [initialSession]);
 
-    getSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription?.unsubscribe();
-  }, []);
-
-  // Function to check if user is authenticated
-  const isAuthenticated = async (): Promise<boolean> => {
-    const { data } = await supabase.auth.getSession();
-    return data?.session?.user != null;
-  };
-
-  // Function to log out and destroy session
-  const logout = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
-    setUser(null);
+  const isAuthenticated = (): boolean => {
+    return !!user; // Check if the user is authenticated
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, isAuthenticated, logout }}>
+    <AuthContext.Provider value={{ session, user, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

@@ -95,10 +95,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   // the user is not authenticated, go to login
   if (!session.has("access_token")) {
     const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
-    throw redirect(`/login?${searchParams}`);
+    throw redirect(`/auth/login?${searchParams}`);
   } else {
     // otherwise execute the query for the page, but first get token
-    const { user, error: sessionErr } = await supabaseClient.auth.api.getUser(
+    const { data: user, error: sessionErr } = await supabaseClient.auth.getUser(
       session.get("access_token")
     );
 
@@ -106,7 +106,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     // to match the user associated with the access_token
     if (!sessionErr) {
       // activate the session with the auth_token
-      supabaseClient.auth.setAuth(session.get("access_token"));
+      await supabaseClient.auth.setSession({ access_token: session.get("access_token"), refresh_token: session.get("refresh_token") });
 
       // now query the data you want from supabase
       // const { data: chargers, error } = await supabaseClient
@@ -114,6 +114,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       //   .select("*");
 
       // return data and any potential errors alont with user
+      console.log("THIS IS THE USER: ", user);
       return { user };
     } else {
       return { error: sessionErr };
@@ -138,23 +139,24 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 // https://remix.run/api/conventions#meta
-export const meta = () => {
-  return {
-    title: "Remix Supabase Starter",
-    description: "Welcome to remix!",
-  };
-};
+// export const meta = () => {
+//   return {
+//     title: "Remix Supabase Starter",
+//     description: "Welcome to remix!",
+//   };
+// };
 
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
-  const { error, user } = useLoaderData();
+  const { error, user } = useLoaderData<{ error?: { message: string }, user?: { user } }>();
 
   return (
     <div className="remix__page">
       <main>
         <div className="flex flex-1 items-center flex-col my-4 ">
           <h2 className="font-bold text-2xl">Welcome to Remix Supabase App</h2>
-          <h4> {user?.email}</h4>
+          <h3 className="font-bold text-xl">Account Overview</h3>
+          <h4> {user?.user?.email}</h4>
         </div>
         <div className="flex flex-1 items-center flex-row my-4 ">
           <Form method="post">

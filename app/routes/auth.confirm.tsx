@@ -16,7 +16,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (token_hash && type) {
     const supabase = createServerClient(
       process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!,
+      process.env.SUPABASE_KEY!,
       {
         cookies: {
           getAll() {
