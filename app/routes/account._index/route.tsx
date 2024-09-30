@@ -15,7 +15,6 @@ export const loader: LoaderFunction = async ({ request }) => {
   console.log(request.headers.get("Cookie"));
 
   const session = await getSession(request.headers.get("Cookie"));
-  console.log(session.has("access_token"));
 
   // if there is no access token in the header then
   // the user is not authenticated, go to login
@@ -72,7 +71,6 @@ export default function Index() {
     <div className="remix__page">
       <main>
         <div className="flex flex-1 items-center flex-col my-4 ">
-          <h2 className="font-bold text-2xl">Welcome to Remix Supabase App</h2>
           <h3 className="font-bold text-xl">Account Overview</h3>
           <h4> {user?.user?.email}</h4>
         </div>

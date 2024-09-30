@@ -52,6 +52,16 @@ export default function AdminLayout() {
                   <span className="ml-3">Books</span>
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/admin/process"
+                  className={`flex items-center px-4 py-2 rounded-lg ${isActive(
+                    "/admin/books"
+                  )}`}
+                >
+                  <span className="ml-3">Process</span>
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

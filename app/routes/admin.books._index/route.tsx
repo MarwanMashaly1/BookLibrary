@@ -1,218 +1,77 @@
-// import { useState } from "react";
-// import { useLoaderData, Form } from "@remix-run/react";
-// import { json } from "@remix-run/node";
-// import { getSupabase } from "~/db/supabase.server";
-
-// export const loader = async ({ request }) => {
-//   const { supabase } = getSupabase(request);
-
-//   // Fetch user details and books
-//   const {
-//     data: { user },
-//   } = await supabase.auth.getUser();
-//   const { data: books, error } = await supabase
-//     .from("Books")
-//     .select("*")
-//     .eq("location_id", user.location_id);
-
-//   if (error) throw new Response("Error fetching books", { status: 500 });
-//   return json({ books });
-// };
-
-// export default function AdminBooksPage() {
-//   const { books } = useLoaderData();
-//   const [isModalOpen, setModalOpen] = useState(false);
-//   const [editingBook, setEditingBook] = useState(null);
-
-//   return (
-//     <div className="container mx-auto p-8">
-//       <h1 className="text-3xl font-semibold mb-6">Manage Books</h1>
-
-//       <div className="flex justify-end mb-4">
-//         <button
-//           onClick={() => {
-//             setModalOpen(true);
-//             setEditingBook(null);
-//           }}
-//           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-//         >
-//           Add Book
-//         </button>
-//       </div>
-
-//       {/* Books Table */}
-//       <div className="overflow-x-auto">
-//         <table className="table-auto w-full bg-white shadow-md rounded">
-//           <thead className="bg-gray-100">
-//             <tr>
-//               <th className="px-4 py-2">ID</th>
-//               <th className="px-4 py-2">Title</th>
-//               <th className="px-4 py-2">Author</th>
-//               <th className="px-4 py-2">Stock</th>
-//               <th className="px-4 py-2">To Borrow</th>
-//               <th className="px-4 py-2">To Buy</th>
-//               <th className="px-4 py-2">Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {books.map((book) => (
-//               <tr key={book.id} className="border-t">
-//                 <td className="px-4 py-2">{book.id}</td>
-//                 <td className="px-4 py-2">{book.title}</td>
-//                 <td className="px-4 py-2">{book.author}</td>
-//                 <td className="px-4 py-2">{book.stock}</td>
-//                 <td className="px-4 py-2">{book.to_borrow ? "Yes" : "No"}</td>
-//                 <td className="px-4 py-2">{book.to_buy ? "Yes" : "No"}</td>
-//                 <td className="px-4 py-2 flex space-x-2">
-//                   <button
-//                     onClick={() => {
-//                       setEditingBook(book);
-//                       setModalOpen(true);
-//                     }}
-//                     className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
-//                   >
-//                     Edit
-//                   </button>
-//                   <Form method="post" action="/admin/books/delete">
-//                     <input type="hidden" name="id" value={book.id} />
-//                     <button
-//                       type="submit"
-//                       className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-//                     >
-//                       Delete
-//                     </button>
-//                   </Form>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* Add/Edit Modal */}
-//       {isModalOpen && (
-//         <AddEditBookModal
-//           book={editingBook}
-//           closeModal={() => setModalOpen(false)}
-//         />
-//       )}
-//     </div>
-//   );
-// }
-
-// function AddEditBookModal({ book, closeModal }) {
-//   return (
-//     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
-//       <div className="bg-white p-8 rounded shadow-lg w-1/3">
-//         <h2 className="text-xl font-semibold mb-4">
-//           {book ? "Edit Book" : "Add Book"}
-//         </h2>
-//         <Form method="post">
-//           {book && <input type="hidden" name="id" value={book.id} />}
-//           <div className="mb-4">
-//             <label className="block text-sm font-bold mb-2">Title</label>
-//             <input
-//               type="text"
-//               name="title"
-//               defaultValue={book?.title}
-//               className="w-full border px-3 py-2 rounded"
-//               required
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-sm font-bold mb-2">Author</label>
-//             <input
-//               type="text"
-//               name="author"
-//               defaultValue={book?.author}
-//               className="w-full border px-3 py-2 rounded"
-//               required
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-sm font-bold mb-2">Stock</label>
-//             <input
-//               type="number"
-//               name="stock"
-//               defaultValue={book?.stock}
-//               className="w-full border px-3 py-2 rounded"
-//               required
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-sm font-bold mb-2">To Borrow</label>
-//             <input
-//               type="checkbox"
-//               name="to_borrow"
-//               defaultChecked={book?.to_borrow}
-//               className="mr-2"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-sm font-bold mb-2">To Buy</label>
-//             <input
-//               type="checkbox"
-//               name="to_buy"
-//               defaultChecked={book?.to_buy}
-//               className="mr-2"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-sm font-bold mb-2">Description</label>
-//             <textarea
-//               name="description"
-//               defaultValue={book?.description}
-//               className="w-full border px-3 py-2 rounded"
-//               rows={4}
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-sm font-bold mb-2">Category</label>
-//             <input
-//               type="text"
-//               name="category"
-//               defaultValue={book?.category}
-//               className="w-full border px-3 py-2 rounded"
-//             />
-//           </div>
-//           <div className="mb-4">
-//             <label className="block text-sm font-bold mb-2">Image URL</label>
-//             <input
-//               type="url"
-//               name="image"
-//               defaultValue={book?.image}
-//               className="w-full border px-3 py-2 rounded"
-//             />
-//           </div>
-//           <div className="flex justify-end">
-//             <button
-//               type="submit"
-//               name="intent"
-//               value={book ? "edit" : "add"}
-//               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-//             >
-//               {book ? "Update" : "Add"}
-//             </button>
-//             <button
-//               type="button"
-//               onClick={closeModal}
-//               className="ml-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-//             >
-//               Cancel
-//             </button>
-//           </div>
-//         </Form>
-//       </div>
-//     </div>
-//   );
-// }
-
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, redirect } from "@remix-run/react";
 import { useState } from "react";
+import { json, LoaderFunction, ActionFunction } from "@remix-run/node";
+import { supabaseClient } from "~/utils/auth.server";
+import { getSession, destroySession } from "~/utils/session.server";
+
+export const loader: LoaderFunction = async ({ request }) => {
+  try {
+    const redirectTo = new URL(request.url).pathname;
+    const session = await getSession(request.headers.get("Cookie"));
+
+    // Redirect to login if not authenticated
+    if (!session.has("access_token")) {
+      const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
+      throw redirect(`/auth/login?${searchParams}`);
+    }
+
+    // Retrieve logged-in user
+    const { data: user, error: sessionErr } = await supabaseClient.auth.getUser(
+      session.get("access_token")
+    );
+
+    if (sessionErr || !user) {
+      console.error("Error fetching user:", sessionErr);
+      throw new Response("User not found or authentication error", { status: 500 });
+    }
+
+    // Log the user ID for debugging purposes
+    console.log("Logged-in User ID:", user.user.id);
+
+    // Retrieve the user's location_id from the users table
+    const { data: profile, error: profileError } = await supabaseClient
+      .from("users")
+      .select("location_id")
+      .eq("id", user.user.id)
+
+    console.log("Profile:", profile);
+
+    if (profileError || !profile) {
+      console.error("Error fetching profile:", profileError);
+
+      // If no profile found, return an empty books list for the UI to render an empty table
+      if (profileError.code === 'PGRST116') {
+        console.error("No profile found for this user.");
+        return json({ books: [], location_id: null });
+      }
+
+      throw new Response("Profile not found or error fetching location_id", { status: 500 });
+    }
+
+    // Fetch the books based on the user's location_id
+    const { data: books, error: booksError } = await supabaseClient
+      .from("Books")
+      .select("*")
+      .eq("location_id", profile[0].location_id);
+
+    if (booksError) {
+      console.error("Error fetching books:", booksError);
+      throw new Response("Error fetching books", { status: 500 });
+    }
+
+    // Return the books and location_id
+    return json({ books, location_id: profile[0].location_id });
+
+  } catch (error) {
+    console.error("Loader Error:", error);
+    throw new Response("Internal Server Error", { status: 500 });
+  }
+};
+
+
 
 export default function AdminBooksPage() {
-  const { books } = useLoaderData();
-
+  const { books, location_id } = useLoaderData();
   const [showModal, setShowModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
 
@@ -233,7 +92,7 @@ export default function AdminBooksPage() {
           </tr>
         </thead>
         <tbody>
-          {books.length > 0 ? (
+          {books && books.length > 0 ? (
             books.map((book) => (
               <tr key={book.id} className="border-t">
                 <td className="py-2 px-4">{book.title}</td>
@@ -292,6 +151,9 @@ export default function AdminBooksPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded shadow-md w-1/3">
+            <h2 className="text-2xl font-bold mb-4">
+              {selectedBook ? "Edit" : "Add"} Book
+            </h2>
             <form method="post">
               <input type="hidden" name="id" value={selectedBook?.id || ""} />
               <div>
@@ -315,6 +177,16 @@ export default function AdminBooksPage() {
                 />
               </div>
               <div className="mt-2">
+                <label>Description</label>
+                <input
+                  type="text"
+                  name="author"
+                  defaultValue={selectedBook?.description || ""}
+                  required
+                  className="border p-2 w-full"
+                />
+              </div>
+              <div className="mt-2">
                 <label>Stock</label>
                 <input
                   type="number"
@@ -324,8 +196,42 @@ export default function AdminBooksPage() {
                   className="border p-2 w-full"
                 />
               </div>
+              <div className="mt-2">
+                <label>To Borrow</label>
+                <select
+                  name="to_borrow"
+                  defaultValue={selectedBook?.to_borrow || "false"}
+                  required
+                  className="border p-2 w-full"
+                >
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div className="mt-2">
+                <label>To Buy</label>
+                <select
+                  name="to_borrow"
+                  defaultValue={selectedBook?.to_buy || "false"}
+                  required
+                  className="border p-2 w-full"
+                >
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              {/* price */}
+              <div className="mt-2">
+                <label>Price</label>
+                <input
+                  type="number"
+                  name="price"
+                  defaultValue={selectedBook?.price || ""}
+                  required
+                  className="border p-2 w-full"
+                />
+              </div>
 
-              {/* Other form fields as needed for the book */}
 
               <div className="mt-4 flex justify-end space-x-2">
                 <button
